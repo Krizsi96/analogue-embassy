@@ -9,6 +9,7 @@ use panic_halt as _;
 use {defmt_rtt as _, panic_probe as _};
 
 use embassy_executor::Spawner;
+use embassy_stm32::adc::Adc;
 use embassy_stm32::gpio::{Level, Output, Speed};
 use embassy_time::{Duration, Timer};
 use fmt::info;
@@ -16,13 +17,14 @@ use fmt::info;
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
     let p = embassy_stm32::init(Default::default());
-    let mut led = Output::new(p.PB7, Level::High, Speed::Low);
+
+    let mut adc = Adc::new(p.ADC1);
+
+    let mut pin = p.PA0;
 
     loop {
-        info!("Hello, World!");
-        led.set_high();
-        Timer::after(Duration::from_millis(500)).await;
-        led.set_low();
-        Timer::after(Duration::from_millis(500)).await;
+        let value = adc.blocking_read(&mut pin);
+        info!("ADC reading: {}", value);
+        Timer::after(Duration::from_millis(5)).await;
     }
 }
