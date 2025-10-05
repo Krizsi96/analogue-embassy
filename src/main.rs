@@ -8,9 +8,9 @@ use panic_halt as _;
 #[cfg(feature = "defmt")]
 use {defmt_rtt as _, panic_probe as _};
 
+use analogue_embassy::is_position_max;
 use embassy_executor::Spawner;
 use embassy_stm32::adc::Adc;
-use embassy_stm32::gpio::{Level, Output, Speed};
 use embassy_time::{Duration, Timer};
 use fmt::info;
 
@@ -23,8 +23,8 @@ async fn main(_spawner: Spawner) {
     let mut pin = p.PA0;
 
     loop {
-        let value = adc.blocking_read(&mut pin);
-        info!("ADC reading: {}", value);
+        let value = is_position_max(&mut adc, &mut pin);
+        info!("is position max? {}", value);
         Timer::after(Duration::from_millis(5)).await;
     }
 }
